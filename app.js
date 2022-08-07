@@ -1,38 +1,58 @@
-// const amount = 12;
+//// !Path module
 
-// if (amount < 10) {
-//     console.log("small amount");
-// }else{
-//     console.log("large amount");
-// }
+// const path = require('path');
+// console.log(path.sep);
 
-// console.log(`fist node app`);
+// const filePath = path.join("/content","subfolder","test.txt");
+// console.log("File path =",filePath);
 
-// const names = require('./newModule')
-// const sayHi = require('./utils1')
+////?returns last portion of path
+// const base = path.basename(filePath);
+// console.log("Base =", base);
 
-// console.log(names);
-// sayHi(names.name2)
+////? returns directory part of path;
+// console.log("Directory path =", path.dirname(filePath));
 
-// require('./add.js')
+// const absolute = path.resolve(__dirname, 'content','subfolder','test.txt');
+// console.log(absolute);
 
-// //! OS Module 
+//// !File System (Sync)
 
-// const os = require('os');
+// const {readFileSync, writeFileSync} = require('fs');
+// const first = readFileSync('./content/first.txt','utf8');
+// const second = readFileSync('./content/second.txt','utf8');
 
-//info about user
-// const user = os.userInfo();
-// console.log(user);
+// console.log(first,second)
 
-//system uptime in seconds
+//// *Flag a is to append
+// writeFileSync('./content/first.txt',`this is the first.txt file`,{flag:'a'});
 
-// console.log(`the sustem uptime in seconds is ${os.uptime()}`);
+//// !File System (Asynchronous);
 
-// const currentOS = {
-//         name: os.type(),
-//         release : os.release(),
-//         totalMem: os.totalmem(),
-//         freeMem: os.freemem(),
-// }
+const {readFile, writeFile} = require('fs');
 
-// console.log(currentOS);
+readFile('./content/first.txt', 'utf8', (err, result) => {
+        if (err) {
+                console.log(err)
+                return
+        }
+        const first = result
+        readFile('./content/second.txt', 'utf8', (err, result) => {
+                if (err) {
+                        console.log(err)
+                        return
+                }
+                const second = result
+                writeFile(
+                        './content/result-async.txt',
+                        `Here is the result : ${first}, ${second}`,
+                        (err, result) => {
+                                if (err) {
+                                        console.log(err)
+                                        return
+                                }
+                                console.log('done with this task')
+                        }
+                )
+        })
+})
