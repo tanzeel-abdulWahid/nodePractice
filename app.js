@@ -1,58 +1,89 @@
-//// !Path module
+////!HTTP TOPIC
+// const http = require('http');
 
-// const path = require('path');
-// console.log(path.sep);
+// const server = http.createServer((req,res) => {
+//         // console.log(req);
+//         res.write("Welcome to the server");
+//         res.end();
+// })
 
-// const filePath = path.join("/content","subfolder","test.txt");
-// console.log("File path =",filePath);
+// server.listen(100);
 
-////?returns last portion of path
-// const base = path.basename(filePath);
-// console.log("Base =", base);
+// const server = http.createServer((req,res) => {
+//         if (req.url === "/") {
+//                 res.end("This is Home Page");
+//         }
+//         else if (req.url === "/about") {
+//                 res.end("This is about Page");
+//         }
+//         else {
+//                 res.end(`
+//                         <h1>Oops!</h1>
+//                         <p>We can't seem to find the page you are looking for</p>
+//                         <a href="/">back home</a>
+//                 `)
+//         } 
+// })
+// server.listen(100);
 
-////? returns directory part of path;
-// console.log("Directory path =", path.dirname(filePath));
+//// ! event  loop ex
 
-// const absolute = path.resolve(__dirname, 'content','subfolder','test.txt');
-// console.log(absolute);
+// const server = http.createServer((req,res) => {
+//         console.log("req event");
+//         res.end("hello world!");
+// })
 
-//// !File System (Sync)
+// server.listen(100, () => {
+//         console.log("Server listening on port 100");
+// });
 
-// const {readFileSync, writeFileSync} = require('fs');
-// const first = readFileSync('./content/first.txt','utf8');
-// const second = readFileSync('./content/second.txt','utf8');
+//// ! Async await 
 
-// console.log(first,second)
+// const {readFile, writeFile} = require("fs").promises
 
-//// *Flag a is to append
-// writeFileSync('./content/first.txt',`this is the first.txt file`,{flag:'a'});
+// const util = require('util')
+// const readFilePromise = util.promisify(readFile)
+// const writeFilePromise = util.promisify(writeFile)
 
-//// !File System (Asynchronous);
+// const start = async () => {
+//         try {
+//                 const first = await readFile("./content/first.txt","utf8")
+//                 const second = await readFile("./content/second.txt","utf8")
+//                 await writeFile("./content/result.txt",`this is magic ${first} ${second}`,{flag:'a'})
+//                 console.log(first,second);
 
-const {readFile, writeFile} = require('fs');
+//         } catch (error) {
+//                 console.log(error);
+//         }
+// }
+// start();
 
-readFile('./content/first.txt', 'utf8', (err, result) => {
-        if (err) {
-                console.log(err)
-                return
-        }
-        const first = result
-        readFile('./content/second.txt', 'utf8', (err, result) => {
-                if (err) {
-                        console.log(err)
-                        return
-                }
-                const second = result
-                writeFile(
-                        './content/result-async.txt',
-                        `Here is the result : ${first}, ${second}`,
-                        (err, result) => {
-                                if (err) {
-                                        console.log(err)
-                                        return
-                                }
-                                console.log('done with this task')
-                        }
-                )
-        })
+
+//// ! Events 
+
+const EventEmitter = require('events');
+const customEmitter = new EventEmitter();
+
+////* on and emit methods
+////* keep track of the order
+////* additional arguments
+////* built-in modules utilize it
+
+// customEmitter.on("response",()=> {
+//         console.log("Response received");
+// })
+
+// const eventHandler = (id,name) => {
+//         console.log(`received ${name} and ${id}`);
+// }
+// customEmitter.on("response",eventHandler)
+// customEmitter.emit("response",1,'tanzeel')
+
+//// * Http using events 
+const http = require('http');
+const server = http.createServer();
+server.on('request', (req,res) => {
+        res.end("Welcome")
 })
+
+server.listen(100);
