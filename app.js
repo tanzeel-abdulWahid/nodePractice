@@ -1,89 +1,71 @@
-////!HTTP TOPIC
-// const http = require('http');
+////! STREAMING
 
-// const server = http.createServer((req,res) => {
-//         // console.log(req);
-//         res.write("Welcome to the server");
-//         res.end();
+// const {createReadStream} = require('fs');
+
+// default 64kb
+// last buffer - remainder
+// highWaterMark - control size
+// const stream = createReadStream('./content/big.txt', { highWaterMark: 90000 })
+// const stream = createReadStream('../content/big.txt', { encoding: 'utf8' })
+
+////* Simple example
+// const stream = createReadStream("./content/first.txt",{highWaterMark: 90000, encoding: 'utf8'});
+// stream.on('data', (chunkedData) => {
+//         console.log(chunkedData);
 // })
 
-// server.listen(100);
-
-// const server = http.createServer((req,res) => {
-//         if (req.url === "/") {
-//                 res.end("This is Home Page");
-//         }
-//         else if (req.url === "/about") {
-//                 res.end("This is about Page");
-//         }
-//         else {
-//                 res.end(`
-//                         <h1>Oops!</h1>
-//                         <p>We can't seem to find the page you are looking for</p>
-//                         <a href="/">back home</a>
-//                 `)
-//         } 
-// })
-// server.listen(100);
-
-//// ! event  loop ex
-
-// const server = http.createServer((req,res) => {
-//         console.log("req event");
-//         res.end("hello world!");
+// stream.on('error', (err) => {
+//         console.log(err);
 // })
 
-// server.listen(100, () => {
-//         console.log("Server listening on port 100");
-// });
+////*example with https
 
-//// ! Async await 
+// var https = require('https');
+// var fs = require('fs');
 
-// const {readFile, writeFile} = require("fs").promises
+// https.createServer((req, res) => {
+//         const fileStream = fs.createReadStream('./content/first.txt','utf8');
+//         fileStream.on('data',(data)=>{
+//                 res.write(data);
+//         })
+//         fileStream.end('end',()=>{
+//                 res.end();
+//         });
 
-// const util = require('util')
-// const readFilePromise = util.promisify(readFile)
-// const writeFilePromise = util.promisify(writeFile)
+//         fileStream.on('error',(err)=>{
+//                 res.end(err);
+//         });
+// }).listen(5000);
 
-// const start = async () => {
-//         try {
-//                 const first = await readFile("./content/first.txt","utf8")
-//                 const second = await readFile("./content/second.txt","utf8")
-//                 await writeFile("./content/result.txt",`this is magic ${first} ${second}`,{flag:'a'})
-//                 console.log(first,second);
+////! HTTPS request
 
-//         } catch (error) {
-//                 console.log(error);
-//         }
-// }
-// start();
-
-
-//// ! Events 
-
-const EventEmitter = require('events');
-const customEmitter = new EventEmitter();
-
-////* on and emit methods
-////* keep track of the order
-////* additional arguments
-////* built-in modules utilize it
-
-// customEmitter.on("response",()=> {
-//         console.log("Response received");
-// })
-
-// const eventHandler = (id,name) => {
-//         console.log(`received ${name} and ${id}`);
-// }
-// customEmitter.on("response",eventHandler)
-// customEmitter.emit("response",1,'tanzeel')
-
-//// * Http using events 
 const http = require('http');
-const server = http.createServer();
-server.on('request', (req,res) => {
-        res.end("Welcome")
+
+// const homePage = readFileSync('./navbar-app/index.html')
+
+const server = http.createServer((req,res) => {
+        const url = req.url;
+        if (url === "/") {
+                res.writeHead(200,{'Content-Type': 'text/html'});
+
+                // //* we can pass whole page also
+                // res.write(homePage);
+
+                res.write("<h1>Welcome to home page</h1>");
+                res.end();
+        }
+
+        else if (url === "/about") {
+                res.writeHead(200, { 'Content-Type': 'text/html' });
+                res.write("<h1>Welcome to about page</h1>");
+                res.end();
+        }
+        else{
+                res.writeHead(404, { 'Content-Type': 'text/html' });
+                res.write("<h1>Page does not exist</h1>");
+                res.end();
+        }
+
 })
 
-server.listen(100);
+server.listen(5000);
