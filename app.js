@@ -1,98 +1,43 @@
-// //!EXPRESS js
-
-const express = require('express')
+const express = require('express');
 const app = express();
-// const path = require('path');
-// // app.get('/', (req, res) => {
-// //         console.log("User hit the reference");
-// //         res.status(200).send("Welcome");
-// // })
 
-// // app.get('/about', (req, res) => {
-// //         res.status(200).send("welcome to about page");
-// // })
+const middleware = module.require('./middleware');
+const authorize = module.require('./authorize');
+// //* res => middleware => res
 
-// // setup static and middleware
-// // //* in public folder, all static imgs, js file and css file are available;
-// app.use(express.static('./public'));
+// //* express ka apna he
+// app.use(express.static('./public'))
 
+// //*jo khud bbnae wo custom he 
+// //* morgan library bh he
 
-
-// // //* we can add this in static (public folder) since it is static
-// // app.get('/', (req, res) => {
-// //         res.sendFile(path.resolve(__dirname, './content/first.txt'))
-// // });
-
-// app.all('*', (req, res) => {
-//         res.status(404).send("<h1>Page not found</h1>");
+// app.get('/', middleware, (req, res) => {
+//         res.send("Home");
 // })
 
-// app.listen('5000',() => {
-//         console.log("Port started");
-// })
+// app.get('/about', middleware,(req, res) => {
+//         res.send("about");
+// });
 
-// //!JSON
+// //* instead of passing middleware to every get request we do this
+app.use([middleware, authorize])
+// //* we can use multiple middlewares in it by passing in list
 
-// const { people } = require('./data');
-// app.get('/',(req,res) => {
-//         res.json(people);
-// })
+// //*if we want to apply middleware specific url we pass path
+// //* it will apply to every url starting with the api
+// app.use('/api',middleware)
 
-// app.listen('5000',() => {
-//         console.log("Port started");
-// })
-
-// //!Param and query
-
-const {products} = require('./data');
-app.get('/',(req,res) => {
-        res.send("<h1>Home page <a href='/api/products' > Products</a> </h1>");
+app.get('/', (req, res) => {
+        res.send("Home");
 })
 
-app.get('/api/products',(req,res) => {
-        const newProducts = products.map((product) =>   {
-                const {id,name} = product
-                return {id,name}
-        })
-        res.json(newProducts);
+app.get('/api/items',(req, res) => {
+        console.log(req.user);
+        res.send("Items");
 })
 
-app.get('/api/products/:id', (req, res) => {
-        const {id} = req.params;
 
-        const singleProduct = products.find((product) => (
-                product.id === Number(id)
-        ))
-        if (!singleProduct) {
-                return res.status(404).send('Product does not exist');
-        }
-        res.json(singleProduct);
+app.listen(5000,()=>{
+        console.log("listening on port");
 })
 
-app.get('/api/products/:id/reviews/:reviewId', (req, res) => {
-        console.log(req.params);
-        res.send("hello world")
-})
-
-app.get('/api/v1/query',(req, res) => {
-        // console.log(req.query);
-        const {search, limit} = req.query
-        let sortedProducts = [...products]
-
-        if (search) {
-                sortedProducts = sortedProducts.filter((product) =>{
-                        return product.name.startsWith(search);
-                })
-        }
-        if (limit) {
-                sortedProducts = sortedProducts.slice(0, limit)
-        }
-        if (sortedProducts.length < 1) {
-                return res.status(200).json({success: true, data:[]})
-        }
-        res.status(200).json(sortedProducts);
-})
-
-app.listen(5000, () => {
-        console.log("port started");
-})
