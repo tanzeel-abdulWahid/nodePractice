@@ -1,71 +1,98 @@
-////! STREAMING
+// //!EXPRESS js
 
-// const {createReadStream} = require('fs');
+const express = require('express')
+const app = express();
+// const path = require('path');
+// // app.get('/', (req, res) => {
+// //         console.log("User hit the reference");
+// //         res.status(200).send("Welcome");
+// // })
 
-// default 64kb
-// last buffer - remainder
-// highWaterMark - control size
-// const stream = createReadStream('./content/big.txt', { highWaterMark: 90000 })
-// const stream = createReadStream('../content/big.txt', { encoding: 'utf8' })
+// // app.get('/about', (req, res) => {
+// //         res.status(200).send("welcome to about page");
+// // })
 
-////* Simple example
-// const stream = createReadStream("./content/first.txt",{highWaterMark: 90000, encoding: 'utf8'});
-// stream.on('data', (chunkedData) => {
-//         console.log(chunkedData);
+// // setup static and middleware
+// // //* in public folder, all static imgs, js file and css file are available;
+// app.use(express.static('./public'));
+
+
+
+// // //* we can add this in static (public folder) since it is static
+// // app.get('/', (req, res) => {
+// //         res.sendFile(path.resolve(__dirname, './content/first.txt'))
+// // });
+
+// app.all('*', (req, res) => {
+//         res.status(404).send("<h1>Page not found</h1>");
 // })
 
-// stream.on('error', (err) => {
-//         console.log(err);
+// app.listen('5000',() => {
+//         console.log("Port started");
 // })
 
-////*example with https
+// //!JSON
 
-// var https = require('https');
-// var fs = require('fs');
+// const { people } = require('./data');
+// app.get('/',(req,res) => {
+//         res.json(people);
+// })
 
-// https.createServer((req, res) => {
-//         const fileStream = fs.createReadStream('./content/first.txt','utf8');
-//         fileStream.on('data',(data)=>{
-//                 res.write(data);
-//         })
-//         fileStream.end('end',()=>{
-//                 res.end();
-//         });
+// app.listen('5000',() => {
+//         console.log("Port started");
+// })
 
-//         fileStream.on('error',(err)=>{
-//                 res.end(err);
-//         });
-// }).listen(5000);
+// //!Param and query
 
-////! HTTPS request
-
-const http = require('http');
-
-// const homePage = readFileSync('./navbar-app/index.html')
-
-const server = http.createServer((req,res) => {
-        const url = req.url;
-        if (url === "/") {
-                res.writeHead(200,{'Content-Type': 'text/html'});
-
-                // //* we can pass whole page also
-                // res.write(homePage);
-
-                res.write("<h1>Welcome to home page</h1>");
-                res.end();
-        }
-
-        else if (url === "/about") {
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.write("<h1>Welcome to about page</h1>");
-                res.end();
-        }
-        else{
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.write("<h1>Page does not exist</h1>");
-                res.end();
-        }
-
+const {products} = require('./data');
+app.get('/',(req,res) => {
+        res.send("<h1>Home page <a href='/api/products' > Products</a> </h1>");
 })
 
-server.listen(5000);
+app.get('/api/products',(req,res) => {
+        const newProducts = products.map((product) =>   {
+                const {id,name} = product
+                return {id,name}
+        })
+        res.json(newProducts);
+})
+
+app.get('/api/products/:id', (req, res) => {
+        const {id} = req.params;
+
+        const singleProduct = products.find((product) => (
+                product.id === Number(id)
+        ))
+        if (!singleProduct) {
+                return res.status(404).send('Product does not exist');
+        }
+        res.json(singleProduct);
+})
+
+app.get('/api/products/:id/reviews/:reviewId', (req, res) => {
+        console.log(req.params);
+        res.send("hello world")
+})
+
+app.get('/api/v1/query',(req, res) => {
+        // console.log(req.query);
+        const {search, limit} = req.query
+        let sortedProducts = [...products]
+
+        if (search) {
+                sortedProducts = sortedProducts.filter((product) =>{
+                        return product.name.startsWith(search);
+                })
+        }
+        if (limit) {
+                sortedProducts = sortedProducts.slice(0, limit)
+        }
+        if (sortedProducts.length < 1) {
+                return res.status(200).json({success: true, data:[]})
+        }
+        res.status(200).json(sortedProducts);
+})
+
+app.listen(5000, () => {
+        console.log("port started");
+})
